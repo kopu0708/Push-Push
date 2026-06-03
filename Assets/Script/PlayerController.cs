@@ -71,4 +71,17 @@ public class NewMonoBehaviourScript : MonoBehaviour
             gaugeImage.fillAmount = currentForce / maxForce;
         }
     }
+
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.name == "Arena")
+        {
+            Debug.Log("Àå¿Ü·Î ¶³¾îÁü");
+            Destroy(gameObject);
+        }
+
+       
+    }
+
 }
