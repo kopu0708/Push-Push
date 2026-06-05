@@ -1,6 +1,6 @@
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance; //싱글톤 
@@ -8,25 +8,43 @@ public class GameManager : MonoBehaviour
     [Header("게임 설정")]
     public float timeRemaining = 30f; //겜 시간
     public int MyScore = 0; // 내 점수
-    public int EnemyScore; // 적 점수
+    public int EnemyScore = 0; // 적 점수
     private bool isGameOver = false; // 게임오버 상태
 
     [Header("UI 연결")]
-    public Text timeText;
-    public Text scoreText;
+    public TextMeshProUGUI timeText;
+    public TextMeshProUGUI playerScoreText;
+    public TextMeshProUGUI enemyScoreText;
 
+    [Header("게임 오버 처리")]
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI result;
     private void Awake()
     {
         if (instance == null)
         {
+            instance = this;
+        }
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    public void Update()
+    {
+        if (isGameOver)
+        {
+            if (Input.anyKeyDown)
+            {
+                RestartGame();
+            }
             return;
         }
         timeRemaining -= Time.deltaTime;
 
-        if (timeRemaining <= 0)
+        if (timeRemaining <= 0) //시간 다 되면 끝 
         {
             timeRemaining = 0;
-            //GameOver(); 이름 바꿔야 할듯? 아무튼 이건 게임 끝났을 때 처리 
+            GameEnd();
         }
 
         if (timeText != null) //남은 시간 띄워주기 
@@ -34,5 +52,32 @@ public class GameManager : MonoBehaviour
             timeText.text = "Time: " + Mathf.Ceil(timeRemaining).ToString();
         }
     }
-} //적이 떨어졌을 때 점수 추가 내가 떨어졌을 때 점수추가 하는 함수 만들고 그러면 또 수정해야하는게 떨어지고 나서 
-//다시 리스폰 기능도 만들어야하고 이왕 만드는 거 효과음이나 배경음도 넣으면 좋겠네
+    public void AddEnemyScore(int amount)
+    {
+        if (isGameOver) return;
+        EnemyScore += amount;
+        if (enemyScoreText != null) enemyScoreText.text = "Enemy: " + EnemyScore.ToString();
+    }
+
+    public void AddMyScore(int amount)
+    {
+        if (isGameOver) return;
+        MyScore += amount;
+        if (playerScoreText != null) playerScoreText.text = "Player: " + MyScore.ToString();
+    }
+    void GameEnd()
+    {
+        isGameOver = true;
+        if(MyScore > EnemyScore) { result.text = "YOU WIN!"; }
+        else if(MyScore < EnemyScore) { result.text = "YOU LOSE"; }
+        else { result.text = "DRAW!"; }
+
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+}
