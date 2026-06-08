@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
+    private SpriteRenderer spriteRenderer;
+    private int originalLayer;
+    private int invincibleLayer;
+
     [Header("사운드 설정")]
     private AudioSource audioSource;   // 내 몸에 붙은 스피커
     public AudioClip chargeSound;      // 기 모으기 소리 (루프)
@@ -14,6 +18,7 @@ public class Enemy : MonoBehaviour
     public enum AIType { Beginner, Intermediate, Advanced }//ai 난이도 
     [Header("AI 설정")]
     public AIType currentAI = AIType.Beginner;
+    
 
     public float maxForce = 25f; // 충전되는 최대 힘
     public float chargeRate = 5f; // 초당 충전되는 힘
@@ -38,6 +43,11 @@ public class Enemy : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         audioSource = GetComponent<AudioSource>();
 
+        //몸에 붙은 이미지와 레이어 번호를 기억해 둔다.
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        originalLayer = gameObject.layer;
+        invincibleLayer = LayerMask.NameToLayer("Invincible");
+
         SpawnPosition = transform.position; // 처음 시작 위치를 기억해둠
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
@@ -46,11 +56,18 @@ public class Enemy : MonoBehaviour
             targetPos3Ago = target.position; //처음엔 현재 위치로 초기화
         }
 
-        if(currentAI == AIType.Beginner)
+        if (currentAI == AIType.Beginner)
         {
             StartCoroutine(BeginnerRoutine());
         }
-        //여기에 나중에 다른 난이도 ai도 넣기
+        else if (currentAI == AIType.Intermediate)
+        {
+           // StartCoroutine(IntermediateRoutine());
+        }
+        else if(currentAI == AIType.Advanced)
+        {
+           // StartCoroutine(AdvancedRoutine());
+        }
     }
 
     void Update()
@@ -107,6 +124,15 @@ public class Enemy : MonoBehaviour
             currentForce = 0f;
         }
     }
+
+    IEnumerator IntermediateRoutine()
+    {
+        while (true)
+        {
+            if (target == null) yield break;
+
+        }
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -119,13 +145,36 @@ public class Enemy : MonoBehaviour
     {
         if(collision.gameObject.name == "Arena")
         {
+            if (GameManager.instance.timeRemaining <= 0) return;
+
             Debug.Log("적 장외로 떨어짐");
             if (fallSound != null) audioSource.PlayOneShot(fallSound); //추락 할 때 사운드
             GameManager.instance.AddMyScore(1);
 
             transform.position = SpawnPosition;
             rb.linearVelocity = Vector2.zero;
-            currentForce = 0f; 
+            currentForce = 0f;
+
+            StartCoroutine(InvincibleRoutine());
         }
+    }
+
+    IEnumerator InvincibleRoutine() //1초 무적 코루틴 
+    {
+        // 1.레이어를 '무적'으로 바꿔서 적이 통과하게 만듦
+        gameObject.layer = invincibleLayer;
+
+        // 2. 1초 동안 5번 깜빡이기 (0.1초 투명, 0.1초 불투명)
+        for (int i = 0; i < 5; i++)
+        {
+            spriteRenderer.color = new Color(1f, 1f, 1f, 0.3f); // 반투명하게
+            yield return new WaitForSeconds(0.1f);
+
+            spriteRenderer.color = new Color(0.9f, 0.9f, 0.18f, 1f);   // 원래 색으로
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        // 3. 무적이 끝나면 다시 원래 플레이어 레이어로 복구해서 들이받을 수 있게 함
+        gameObject.layer = originalLayer;
     }
 }

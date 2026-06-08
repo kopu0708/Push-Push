@@ -1,11 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
-
+using System.Collections;
 public class NewMonoBehaviourScript : MonoBehaviour
 {
     private Rigidbody2D rb;
     private Vector2 SpawnPosition;
     private Vector2 moveDirection;
+
+    private SpriteRenderer spriteRenderer;
+    private int originalLayer;
+    private int invincibleLayer;
 
     [Header("이동 및 힘 설정")]
     public float maxForce = 25f; // 충전되는 최대 힘
@@ -27,6 +31,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         audioSource = GetComponent<AudioSource>();
         SpawnPosition = transform.position;
+
+        //몸에 붙은 이미지와 레이어 번호를 기억해 둔다.
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        originalLayer = LayerMask.NameToLayer("Player");
+        invincibleLayer = LayerMask.NameToLayer("Invincible");
     }
 
     private void Update()
@@ -97,6 +106,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
     {
         if (collision.gameObject.name == "Arena")
         {
+            if (GameManager.instance.timeRemaining <= 0) return;
+
             Debug.Log("장외로 떨어짐");
             if (fallSound != null) audioSource.PlayOneShot(fallSound);
             GameManager.instance.AddEnemyScore(1); // 적 점수 오름
@@ -105,6 +116,27 @@ public class NewMonoBehaviourScript : MonoBehaviour
             transform.position = SpawnPosition;
             rb.linearVelocity = Vector2.zero;
             currentForce = 0f;
+
+            StartCoroutine(InvincibleRoutine());
         }
+    }
+
+    IEnumerator InvincibleRoutine() //1초 무적 코루틴 
+    {
+        // 1.레이어를 '무적'으로 바꿔서 적이 통과하게 만듦
+        gameObject.layer = invincibleLayer;
+
+        // 2. 1초 동안 5번 깜빡이기 (0.1초 투명, 0.1초 불투명)
+        for (int i = 0; i < 5; i++)
+        {
+            spriteRenderer.color = new Color(1f, 1f, 1f, 0.3f); // 반투명하게
+            yield return new WaitForSeconds(0.1f);
+
+            spriteRenderer.color = new Color(1f, 1f, 1f, 1f);   // 원래 색으로
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        // 3. 무적이 끝나면 다시 원래 플레이어 레이어로 복구해서 들이받을 수 있게 함
+        gameObject.layer = originalLayer;
     }
 }
