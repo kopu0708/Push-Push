@@ -16,10 +16,12 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI timeText;
     public TextMeshProUGUI playerScoreText;
     public TextMeshProUGUI enemyScoreText;
+  
 
     [Header("게임 오버 처리")]
     public GameObject gameOverPanel;
     public TextMeshProUGUI result;
+    public TextMeshProUGUI AnounceGoToMain;
     private void Awake()
     {
         if (instance == null)
@@ -69,6 +71,7 @@ public class GameManager : MonoBehaviour
     void GameEnd()
     {
         isGameOver = true;
+        if(AnounceGoToMain != null)AnounceGoToMain.text = "Press any key to Restart\nPress [ESC] to MainMenu";
         if(MyScore > EnemyScore) { result.text = "YOU WIN!"; }
         else if(MyScore < EnemyScore) { result.text = "YOU LOSE"; }
         else { result.text = "DRAW!"; }
@@ -80,5 +83,10 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 }

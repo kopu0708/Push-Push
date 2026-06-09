@@ -55,7 +55,7 @@ public class Enemy : MonoBehaviour
             target = playerObj.transform;
             targetPos3Ago = target.position; //처음엔 현재 위치로 초기화
         }
-
+        currentAI = GameManager.selectedDifficulty;
         if (currentAI == AIType.Beginner)
         {
             StartCoroutine(BeginnerRoutine());
