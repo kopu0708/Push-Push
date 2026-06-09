@@ -62,11 +62,11 @@ public class Enemy : MonoBehaviour
         }
         else if (currentAI == AIType.Intermediate)
         {
-           // StartCoroutine(IntermediateRoutine());
+            StartCoroutine(IntermediateRoutine());
         }
         else if(currentAI == AIType.Advanced)
         {
-           // StartCoroutine(AdvancedRoutine());
+           StartCoroutine(AdvancedRoutine());
         }
     }
 
@@ -125,12 +125,103 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    IEnumerator IntermediateRoutine()
+    IEnumerator IntermediateRoutine() //중급 봇 60~100% 랜덤 충전후 발사 그리고 현재 위치로 
     {
         while (true)
         {
             if (target == null) yield break;
 
+            yield return new WaitUntil(() => rb.linearVelocity.magnitude < 0.1f);
+            yield return new WaitForSeconds(0.3f);
+
+            currentForce = 0f;
+
+            float chargeForce = Random.Range(maxForce * 0.6f, maxForce);
+
+            if(chargeSound != null)
+            {
+                audioSource.clip = chargeSound;
+                audioSource.loop = true;
+                audioSource.Play();
+            }
+
+            while (currentForce < maxForce)
+            {
+                currentForce += chargeRate * Time.deltaTime;
+                yield return null;
+            }
+
+            audioSource.Stop();
+            if (dashSound != null) audioSource.PlayOneShot(dashSound);
+
+            if (target == null) yield break;
+
+            Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            rb.AddForce(direction * currentForce, ForceMode2D.Impulse);
+
+            currentForce = 0f;
+        }
+    }
+
+    IEnumerator AdvancedRoutine()
+    {
+        Vector2 arenaCenter = Vector2.zero;// 맵 중앙 위치
+        while (true)
+        {
+            if (target == null) yield break;
+
+            yield return new WaitUntil(() => rb.linearVelocity.magnitude < 0.1f);
+            //[1] 생존 본능(자리싸움)
+            // 현재 내 위치가 중앙에서 3.5f 이상 멀어졌다면 (낭떠러지 위험 구역)
+            float distanceFromCenter = Vector2.Distance(transform.position, arenaCenter);
+            if(distanceFromCenter > 3.5f)
+            {
+                float moveTimer = 0f;
+                while(moveTimer < 1f)
+                {
+                    moveTimer += Time.deltaTime;
+                    Vector2 toCenter = (arenaCenter - (Vector2)transform.position).normalized;
+
+                    rb.AddForce(toCenter * 10f);
+                    yield return null;
+                }
+                yield return new WaitUntil(() => rb.linearVelocity.magnitude < 0.1f);
+            }
+            // [2] 맹공격 턴 (짧은 시간 2배속 충전 후 돌진)
+            yield return new WaitForSeconds(Random.Range(0.1f, 0.2f));
+
+            currentForce = 0f;
+            float randomChargeTime = Random.Range(0.2f, 0.6f);
+            float chargeTimer = 0f;
+
+            if (chargeSound != null)
+            {
+                audioSource.clip = chargeSound;
+                audioSource.loop = true;
+                audioSource.Play();
+            }
+
+            while (chargeTimer < randomChargeTime)
+            {
+                chargeTimer += Time.deltaTime;
+
+                // 충전 속도 2배 특권
+                currentForce += (chargeRate * 2f) * Time.deltaTime;
+                currentForce = Mathf.Clamp(currentForce, 0, maxForce);
+
+                yield return null;
+            }
+
+            audioSource.Stop();
+            if (dashSound != null) audioSource.PlayOneShot(dashSound);
+
+            if (target == null) yield break;
+
+            // 정확하게 현재 플레이어 위치를 노림
+            Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
+            rb.AddForce(direction * currentForce, ForceMode2D.Impulse);
+
+            currentForce = 0f;
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
@@ -150,6 +241,8 @@ public class Enemy : MonoBehaviour
             Debug.Log("적 장외로 떨어짐");
             if (fallSound != null) audioSource.PlayOneShot(fallSound); //추락 할 때 사운드
             GameManager.instance.AddMyScore(1);
+
+            if (!gameObject.activeInHierarchy) return;
 
             transform.position = SpawnPosition;
             rb.linearVelocity = Vector2.zero;

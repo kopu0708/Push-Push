@@ -112,6 +112,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
             if (fallSound != null) audioSource.PlayOneShot(fallSound);
             GameManager.instance.AddEnemyScore(1); // 적 점수 오름
 
+            if (!gameObject.activeInHierarchy) return;
+
             // 플레이어 리스폰
             transform.position = SpawnPosition;
             rb.linearVelocity = Vector2.zero;

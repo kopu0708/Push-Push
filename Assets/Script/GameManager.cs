@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance; //ΩÃ±€≈Ê 
+    public static Enemy.AIType selectedDifficulty = Enemy.AIType.Beginner;
 
     [Header("∞‘¿” º≥¡§")]
     public float timeRemaining = 30f; //∞◊ Ω√∞£
