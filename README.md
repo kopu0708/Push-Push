@@ -43,7 +43,7 @@
 ## 🧠 배운 점 (What I Learned)
 ### 1. 유니티 물리 레이어(Layer Collision Matrix)를 활용한 '정석' 무적 판정
 문제 인식: 리스폰 직후 무적 상태를 만들기 위해 단순히 충돌체(Collider2D)를 끄거나 켜는 방식을 고민했으나, 이는 트리거 체크나 다른 물리 연산을 왜곡할 위험이 있었습니다.
-해결 및 배운 점: 유니티 내부에 독립된 물리 레이어(Player, Enemy, Invincible)를 구축하고 Project Settings -> Physics 2D에서 충돌 매트릭스를 제어하는 방식의 정석을 배웠습니다. 이를 통해 코드 복잡도를 낮추면서도 Physics2D.IgnoreLayerCollision을 활용해 완벽하고 안전한 유령 상태(I-Frames)를 구현할 수 있었습니다.
+해결 및 배운 점: 유니티 내부에 독립된 물리 레이어(Player, Enemy, Invincible)를 구축하고 Project Settings -> Physics 2D에서 충돌 매트릭스를 제어하는 방식의 정석을 배웠습니다. 이를 통해 코드 복잡도를 낮추면서도 Physics2D.IgnoreLayerCollision을 활용해 완벽하고 안전한 유령 상태를 구현할 수 있었습니다.
 
 ### 2. 코루틴(Coroutine)을 통한 연산 최적화와 비동기 연출
 문제 인식: 매 프레임 실행되는 Update 함수 안에서 AI의 타이머나 충전 로직을 돌리는 것은 불필요한 CPU 낭비와 코드 스파게티화를 유발했습니다.
@@ -55,7 +55,7 @@
 
 ### 4. 널 참조(NullReferenceException) 방지를 위한 방어적 프로그래밍
 문제 인식: 캐릭터가 탈락하여 링 밖으로 나가거나 순간적으로 리스폰되는 과정에서, 적 AI가 유효하지 않은 플레이어의 좌표(target.position)를 참조하려다 MissingReferenceException 에러가 발생해 AI 로직이 통째로 멈추는 현상이 있었습니다.
-해결 및 배운 점: 오브젝트의 생성과 파괴가 빈번한 물리 게임에서는 언제나 '대상이 사라질 수 있음'을 염두에 두어야 함을 배웠습니다. 돌진하기 직전 if (target != null)과 같이 타겟의 상태를 재검증하는 안전장치(Guard Clause)를 습관화하는 계기가 되었습니다.
+해결 및 배운 점: 오브젝트의 생성과 파괴가 빈번한 물리 게임에서는 언제나 '대상이 사라질 수 있음'을 염두에 두어야 함을 배웠습니다. 돌진하기 직전 if (target != null)과 같이 타겟의 상태를 재검증하는 안전장치를 습관화하는 계기가 되었습니다.
 ---
 
 ## 🚀 개발 로드맵 (Development Roadmap)
