@@ -40,25 +40,21 @@
 * 캐릭터가 장외로 나갔을 때 오브젝트가 파괴되거나 리스폰되는 과정에서, 적 AI가 이미 파괴된 플레이어의 위치(`target.position`)를 참조하여 발생하는 **`MissingReferenceException`을 방지**하기 위해 돌진 직전 Target의 `null` 상태를 재검증하는 안전장치를 구축했습니다.
 
 
-🧠 배운 점 (What I Learned)
-1. 유니티 물리 레이어(Layer Collision Matrix)를 활용한 '정석' 무적 판정
+## 🧠 배운 점 (What I Learned)
+### 1. 유니티 물리 레이어(Layer Collision Matrix)를 활용한 '정석' 무적 판정
 문제 인식: 리스폰 직후 무적 상태를 만들기 위해 단순히 충돌체(Collider2D)를 끄거나 켜는 방식을 고민했으나, 이는 트리거 체크나 다른 물리 연산을 왜곡할 위험이 있었습니다.
-
 해결 및 배운 점: 유니티 내부에 독립된 물리 레이어(Player, Enemy, Invincible)를 구축하고 Project Settings -> Physics 2D에서 충돌 매트릭스를 제어하는 방식의 정석을 배웠습니다. 이를 통해 코드 복잡도를 낮추면서도 Physics2D.IgnoreLayerCollision을 활용해 완벽하고 안전한 유령 상태(I-Frames)를 구현할 수 있었습니다.
 
-2. 코루틴(Coroutine)을 통한 연산 최적화와 비동기 연출
+### 2. 코루틴(Coroutine)을 통한 연산 최적화와 비동기 연출
 문제 인식: 매 프레임 실행되는 Update 함수 안에서 AI의 타이머나 충전 로직을 돌리는 것은 불필요한 CPU 낭비와 코드 스파게티화를 유발했습니다.
-
 해결 및 배운 점: IEnumerator, WaitUntil, WaitForSeconds를 적극 활용하여 '필요한 순간에만 대기하고 실행되는' 상태식 AI 구조를 만들었습니다. 또한, 시각적인 깜빡임(Flicker) 연출과 무적 시간 타이머를 코루틴 하나로 묶어 처리하며 비동기적 연출 제어에 대한 자신감을 얻었습니다.
 
-3. 시공간 제어(Time.timeScale)와 씬 전환의 함정
+### 3. 시공간 제어(Time.timeScale)와 씬 전환의 함정
 문제 인식: 게임 오버 시 화면을 멈추기 위해 Time.timeScale = 0f;를 사용했다가, 메인 메뉴 씬으로 돌아갔을 때 UI와 화면 전체가 얼어버리는 크리티컬한 버그를 경험했습니다.
-
 해결 및 배운 점: Time.timeScale은 특정 씬에만 국한되는 것이 아니라 유니티 엔진 전체의 글로벌 타임라인에 영향을 준다는 것을 깨달았습니다. 대피소 역할을 하는 HandleGameOverInput()을 분리하고, 씬을 전환하기 전 반드시 Time.timeScale = 1f;로 시간을 정상화해 주어야 한다는 중요한 라이프사이클 규칙을 배웠습니다.
 
-4. 널 참조(NullReferenceException) 방지를 위한 방어적 프로그래밍
+### 4. 널 참조(NullReferenceException) 방지를 위한 방어적 프로그래밍
 문제 인식: 캐릭터가 탈락하여 링 밖으로 나가거나 순간적으로 리스폰되는 과정에서, 적 AI가 유효하지 않은 플레이어의 좌표(target.position)를 참조하려다 MissingReferenceException 에러가 발생해 AI 로직이 통째로 멈추는 현상이 있었습니다.
-
 해결 및 배운 점: 오브젝트의 생성과 파괴가 빈번한 물리 게임에서는 언제나 '대상이 사라질 수 있음'을 염두에 두어야 함을 배웠습니다. 돌진하기 직전 if (target != null)과 같이 타겟의 상태를 재검증하는 안전장치(Guard Clause)를 습관화하는 계기가 되었습니다.
 ---
 
