@@ -1,11 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-public class NewMonoBehaviourScript : MonoBehaviour
+using UnityEngine.SceneManagement;
+
+[RequireComponent(typeof(PlayerInput))]
+public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private Vector2 SpawnPosition;
-    private Vector2 moveDirection;
+    private Color originalColor; 
+    private PlayerInput playerInput;
 
     private SpriteRenderer spriteRenderer;
     private int originalLayer;
@@ -24,29 +28,33 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private AudioSource audioSource;   // 내 몸에 붙은 스피커
     public AudioClip chargeSound;      // 기 모으기 소리 (루프)
     public AudioClip dashSound;        // 돌진 소리
-    //public AudioClip hitSound;         // 충돌 소리 적에서 내주므로 필요없음
+    public AudioClip hitSound;         // 충돌 소리 적에서 내주므로 필요없음
     public AudioClip fallSound;        // 장외 추락 소리
+
+    private void Awake()
+    {
+        playerInput = GetComponent<PlayerInput>();
+    }
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         audioSource = GetComponent<AudioSource>();
         SpawnPosition = transform.position;
 
-        //몸에 붙은 이미지와 레이어 번호를 기억해 둔다.
+        //몸에 붙은 이미지와 레이어 번호를 기억해 둔다. 색상도
         spriteRenderer = GetComponent<SpriteRenderer>();
+        originalColor = spriteRenderer.color;
         originalLayer = LayerMask.NameToLayer("Player");
         invincibleLayer = LayerMask.NameToLayer("Invincible");
     }
 
     private void Update()
     {
-        float moveX = Input.GetAxisRaw("Horizontal");   
-        float moveY = Input.GetAxisRaw("Vertical");
-
-        //대각선 연산 정규화
-        moveDirection = new Vector2(moveX, moveY).normalized;
-
-        if (Input.GetKey(KeyCode.Space) && rb.linearVelocity.magnitude < 0.1f)
+        Vector2 moveDirection = playerInput.MoveDirection;
+        bool isCharging = playerInput.IsChargind;
+        bool isChargeReleased = playerInput.IsChargeReleased;
+        
+        if (isCharging && rb.linearVelocity.magnitude < 0.1f)
         {
             if (chargeSound != null && !audioSource.isPlaying)
             {
@@ -68,7 +76,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
             }
            
         }
-        else if (!Input.GetKey(KeyCode.Space))
+        else if (!isCharging)
         {
             // 스페이스바를 떼고 있을 때는 차지가 안 됨 (안전장치)
         }
@@ -80,7 +88,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
 
 
-        if (Input.GetKeyUp(KeyCode.Space) && moveDirection != Vector2.zero) //스페이스바을 때면 발사
+        if (isChargeReleased && moveDirection != Vector2.zero) //스페이스바을 때면 발사
         {
             audioSource.Stop(); //돌진 직전에 소리 멈추기
             if (dashSound != null) audioSource.PlayOneShot(dashSound); //돌진 소리 재생
@@ -88,7 +96,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
             currentForce = 0f;
             chargeDirection = 1f;
         }
-        else if(Input.GetKeyUp(KeyCode.Space) && moveDirection == Vector2.zero) //방향키를 안누르고 있으면 초기화
+        else if(isChargeReleased && moveDirection == Vector2.zero) //방향키를 안누르고 있으면 초기화
         {
             audioSource.Stop();
             currentForce = 0f;
@@ -101,7 +109,14 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
     }
 
-
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // 상대방과 부딪히면 충돌 효과음 재생
+            if (hitSound != null) audioSource.PlayOneShot(hitSound);
+        }
+    }
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.name == "Arena")
@@ -110,8 +125,16 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
             Debug.Log("장외로 떨어짐");
             if (fallSound != null) audioSource.PlayOneShot(fallSound);
-            GameManager.instance.AddEnemyScore(1); // 적 점수 오름
 
+            if (playerInput.playerIndex == PlayerInput.PlayerIndex.Player2)
+            {
+                GameManager.instance.AddMyScore(1); //플레이어2가 떨어지면 내 점수가 오르게 
+            }
+            else if(playerInput.playerIndex == PlayerInput.PlayerIndex.Player1)
+            {
+                GameManager.instance.AddEnemyScore(1); // 적 점수 오름
+            }
+          
             if (!gameObject.activeInHierarchy) return;
 
             // 플레이어 리스폰
@@ -131,10 +154,10 @@ public class NewMonoBehaviourScript : MonoBehaviour
         // 2. 1초 동안 5번 깜빡이기 (0.1초 투명, 0.1초 불투명)
         for (int i = 0; i < 5; i++)
         {
-            spriteRenderer.color = new Color(1f, 1f, 1f, 0.3f); // 반투명하게
+            spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.3f); // 반투명하게
             yield return new WaitForSeconds(0.1f);
 
-            spriteRenderer.color = new Color(1f, 1f, 1f, 1f);   // 원래 색으로
+            spriteRenderer.color = originalColor; 
             yield return new WaitForSeconds(0.1f);
         }
 

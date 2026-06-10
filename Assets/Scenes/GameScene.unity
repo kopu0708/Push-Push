@@ -856,11 +856,12 @@ GameObject:
   - component: {fileID: 379406012}
   - component: {fileID: 379406011}
   - component: {fileID: 379406010}
+  - component: {fileID: 379406016}
   - component: {fileID: 379406009}
   - component: {fileID: 379406014}
   - component: {fileID: 379406015}
   m_Layer: 3
-  m_Name: Player
+  m_Name: Player1
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1179,7 +1180,7 @@ TrailRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Time: 0.25
-  m_PreviewTimeScale: 0.15
+  m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1239,6 +1240,19 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 0
+--- !u!114 &379406016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 379406008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 529d572885cf33549a963c6c2d5d4b41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInput
+  playerIndex: 0
 --- !u!1 &499716333
 GameObject:
   m_ObjectHideFlags: 0
@@ -1929,7 +1943,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17c4e590be8ceea44b0c3fb8dc98fed1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  chargeSound: {fileID: 8300000, guid: eead2f1080d815642b7ad11c27b17978, type: 3}
+  chargeSound: {fileID: 0}
   dashSound: {fileID: 0}
   hitSound: {fileID: 8300000, guid: eb8b85795fa4cfd4882479bbe3adb6df, type: 3}
   fallSound: {fileID: 8300000, guid: b4917387e3b823644a106299799d9a36, type: 3}
@@ -2085,7 +2099,7 @@ TrailRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Time: 0.25
-  m_PreviewTimeScale: 0.15
+  m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
