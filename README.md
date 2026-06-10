@@ -38,7 +38,9 @@
 
 ### 4. 에러 방어 코드 (MissingReferenceException 예외 처리)
 * 캐릭터가 장외로 나갔을 때 오브젝트가 파괴되거나 리스폰되는 과정에서, 적 AI가 이미 파괴된 플레이어의 위치(`target.position`)를 참조하여 발생하는 **`MissingReferenceException`을 방지**하기 위해 돌진 직전 Target의 `null` 상태를 재검증하는 안전장치를 구축했습니다.
-
+  
+### 5. 씬에 따른 UI 변경 
+*싱글 플레이 씬이냐 아니면 로컬 2인 플레이 씬이냐에 따라 UI에 표시되는 문구가 바뀌게 했습니다.
 
 ## 🧠 배운 점 (What I Learned)
 ### 1. 유니티 물리 레이어(Layer Collision Matrix)를 활용한 '정석' 무적 판정
