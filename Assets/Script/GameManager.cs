@@ -1,5 +1,6 @@
-using UnityEngine;
 using TMPro;
+using Unity.Netcode;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
@@ -129,10 +130,19 @@ public class GameManager : MonoBehaviour
     }
 
     public void RestartGame()
-    {
-        Time.timeScale = 1f; // 재시작 시 시간 복구
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    {// 로컬 씬(싱글플레이/2인용)일 때는 기존 방식 그대로 사용
+        if (SceneManager.GetActiveScene().name == "GameSceneLocal")
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+        // 멀티플레이 씬일 때는 네트워크 동기화 이동 사용!
+        else
+        {
+            if (NetworkManager.Singleton.IsServer)
+            {
+                // 방장이 모든 플레이어를 데리고 현재 씬을 다시 로드합니다.
+                NetworkManager.Singleton.SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+            }
+        }
     }
-
-    
 }

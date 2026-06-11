@@ -52,7 +52,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartMultiGame()
     {
-        //아직 구현 안됨
+        SceneManager.LoadScene("Scene_NetLobby");
     }
     public void closeMultiPlay()
     {
