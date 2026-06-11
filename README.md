@@ -3,7 +3,7 @@
 ### 유니티 2D 물리 엔진과 코루틴을 활용하여 짜릿한 반동과 타격감을 구현한 탑뷰 아케이드 액션 게임입니다.
 
 ### 📸 게임 화면
-![Game UI](C:\dev\unity_dev\PUSH_PUSH\Assets\image)
+![Game UI]("C:\dev\unity_dev\PUSH_PUSH\Assets\image\화면 캡처 2026-06-11 213602.png")
 
 ## 🎮 게임 룰 (Game Rules)
 ### 제한 시간: 30초 동안 치열한 밀어내기 공방전이 펼쳐집니다.
